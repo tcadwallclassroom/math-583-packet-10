@@ -1,0 +1,266 @@
+---
+title: "Packet 10 - Linear Models"
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+  encoding=encoding,
+  output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+author: "Todd CadwalladerOlsker"
+date: "*Last updated:* `r Sys.Date()`"
+output:
+  rmdformats::downcute:
+    downcute_theme: "chaos"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(rmdformats)
+library(openintro)
+library(tidyverse)
+library(gghighlight)
+library(formatR)
+library(infer)
+library(gssr)
+knitr::opts_chunk$set(echo = T, 
+                      cache = T, 
+                      eval = T, 
+                      cache.lazy = F, 
+                      warning = F)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=80),tidy=F)
+options(scipen = 999)
+```
+
+# Linear Regression
+
+**Lightly read pages 305-311 of OpenIntro Statistics.**
+
+## First Steps
+
+After loading the `openintro` library, let's examine the `elmhurst` data set. Use `View(elmhurst)` to see the data, and `help("elmhurst")` to get more information on the variables, how the data was collected, etc. 
+
+We might expect a relationship between family income and the amount of gift aid (scholarships, grants, and the like) offered. Let's find out:
+
+```{r elmhurst first exploration}
+elmhurst %>% ggplot(aes(x = family_income, y = gift_aid)) +
+  geom_point(color='forestgreen') + 
+  labs(x = "Family Income",
+       y = "Gift Aid from University")
+```
+
+It looks like there is at least some general tend toward higher family income corresponding to lower gift aid offered. We can calculate the *least squares regression line* using the `lm` command, and the correlation with `cor`. The correlation is often called \(R\), and \(R^2\)
+
+```{r elmhurst calculation}
+elm_model <- elmhurst %>% lm(gift_aid ~ family_income, data = .)
+summary(elm_model)
+R <- elmhurst %>% summarize(cor(gift_aid,family_income))
+R
+R_squared <- elmhurst %>% summarize(cor(gift_aid,family_income)^2)
+R_squared
+```
+
+Finally, we can plot the least squares regression line along with our data:
+
+```{r elmhurst plot with regression}
+elmhurst %>%  ggplot(aes(x = family_income, y = gift_aid)) +
+  geom_point(color='forestgreen') + 
+  labs(x = "Family Income",
+       y = "Gift Aid from University") +
+  geom_smooth(color='firebrick', method=lm, se=FALSE)
+```
+
+Before continuing, draw 2 more more scatter plots: First, plot `family_income` on the x-axis and `price_paid` on the y-axis, then `gift_aid` on the x-axis and `price_paid` on the y-axis. For each of these, plat the linear regression line, and find the $r$ and $r^2$ values. What do you notice/wonder?
+
+## Confidence Intervals and Hypothesis Tests for slope and correlation
+
+Our old friend, the `infer` package, can use the bootstrap to calculate a confidence interval for the correlation coefficient, R, or the slope of the linear regression model.
+
+```{r}
+
+### For the slope (coefficient on family_income)
+
+slope_hat <-  elmhurst %>% 
+  specify(gift_aid ~ family_income) %>% 
+  calculate(stat = "slope")
+slope_hat
+
+slope_hat_boot_dist <- elmhurst %>% 
+  specify(gift_aid ~ family_income) %>% 
+  generate(reps = 10000, type = "bootstrap") %>% 
+  calculate(stat = "slope")
+
+slope_percentile_ci <- get_ci(slope_hat_boot_dist)
+slope_percentile_ci
+
+slope_hat_boot_dist %>% visualize(bins = 30) +
+  shade_confidence_interval(endpoints = slope_percentile_ci)
+
+### For R, the correlation coefficient:
+
+R_hat <-  elmhurst %>% 
+  specify(gift_aid ~ family_income) %>% 
+  calculate(stat = "correlation")
+R_hat
+
+R_hat_boot_dist <- elmhurst %>% 
+  specify(gift_aid ~ family_income) %>% 
+  generate(reps = 10000, type = "bootstrap") %>% 
+  calculate(stat = "correlation")
+
+R_percentile_ci <- get_ci(R_hat_boot_dist)
+R_percentile_ci
+
+R_hat_boot_dist %>% visualize(bins = 30) +
+  shade_confidence_interval(endpoints = R_percentile_ci)
+```
+
+He can also run a hypothesis test with null hypothesis that the slope (or R) is equal to 0. As before, we will run a permutation test:
+
+```{r}
+slope_hat <-  elmhurst %>% 
+  specify(gift_aid ~ family_income) %>% 
+  calculate(stat = "slope")
+slope_hat
+
+slope_hat_null_dist <- elmhurst %>% 
+  specify(gift_aid ~ family_income) %>% 
+  hypothesize(null = "independence") %>% 
+  generate(reps = 10000, type = "permute") %>% 
+  calculate(stat = "slope")
+
+slope_hat_null_dist %>% visualize(bins = 30) +
+  shade_p_value(obs_stat = slope_hat, direction = "two-sided")
+
+slope_hat_p_value <- slope_hat_null_dist %>% 
+  get_p_value(obs_stat = slope_hat, direction = "two-sided")
+slope_hat_p_value
+```
+
+## Investigate the EPI-Wages-R data set
+
+One way that linear regression is commonly used is in analyzing time series data. **We should be careful:** one of the requirements of linear regression is that the data points are independent of each other. In time series data, successive observations are often related to each other. In practice, we won't worry about this too much, but it is worth keeping in mind.
+
+Let's download some data on median and mean wages for different groups over time: Go to <https://sustainabilitymath.org/statistics-materials/> and scroll to the bottom; look for "Hourly Wage by Race and Gender." Download either the Excel or .csv file, either one can be imported into R.
+
+```{r loaddata,message=FALSE}
+library(readr)
+EPI_Wages_R <- read_csv("EPI-Wages-R.csv")  # put the .csv file in 
+                                            #your working directory first!
+```
+
+Let's start by recreating the headline graphical finding: the gap between median wages of men and women is closing, but still present. We can use the following code:
+
+```{r firstplot, fig.width=6,fig.height=6}
+EPI_Wages_R %>% ggplot() +
+  geom_point(aes(x = Date, y = `Men Median`, color = "Men")) +
+  geom_point(aes(x = Date, y = `Women Median`, color = "Women")) +
+  geom_smooth(aes(x = Date, y = `Men Median`, color = "Men"),
+              method = lm, se = FALSE) +
+  geom_smooth(aes(x = Date, y = `Women Median`, color = "Women"),
+              method = lm, se = FALSE) +
+  scale_color_manual(breaks = c("Men", "Women"),
+                     values = c("firebrick", "slateblue")) +
+  labs(title = "Median Hourly Wages for Men and Women",
+       x = "Year",
+       y = "Median Hourly Wage in 2019 dollars") 
+```
+
+Let's find the linear regression models and correlation coefficients:
+
+```{r firstlm+cor}
+EPI_Wages_R %>% lm(`Men Median` ~ Date, data = .)
+EPI_Wages_R %>% summarize(cor(`Men Median`, Date))
+EPI_Wages_R %>% lm(`Women Median` ~ Date, data = .)
+EPI_Wages_R %>% summarize(cor(`Women Median`, Date))
+```
+
+Before continuing, ask yourself: is it true that men's median wages are declining? Run a hypothesis test to find out! 
+
+What happens if we look at average (mean) wages instead?
+
+## Investigate the Lead and Crime data set
+
+Download Lead-and-Crime.xlsx from <https://sustainabilitymath.org/statistics-materials/> (about halfway down the page). When you import it into R, notice that we will want to skip the first 11 lines that contain descriptive information. 
+
+According to that information, violent crime follows a 22-year lag: that is, assault corresponds most closely with the gasoline lead additives from 22 years previously.
+
+Let's start by creating a new columns that accounts for that lag. We have a bit of cleanup to do with `dplyr` functions as well:
+
+```{r}
+library(readxl)
+Lead_and_Crime <- read_excel("Lead-and-Crime.xlsx", 
+     skip = 11)
+Lead_and_Crime <- Lead_and_Crime %>% 
+  rename(
+  "year" = 6,
+  "population" = 2,
+  "lead_added" = 3,
+  "lead_per_cap" = 4,
+  "violent_crime" = 8,
+  "violent_crime_rate" = 9,
+  "assault" = 10,
+  "assault_rate" = 11,
+  "robbery" = 12,
+  "robbery_rate" = 13,
+  "rape" = 14,
+  "rape_rate" = 15,
+  "unemp_16_19" = 16,
+  "unemp_16_24" = 17,
+)
+Lead_and_Crime <- Lead_and_Crime %>% 
+  select(-any_of(c(1,5,7)))
+Lead_and_Crime_lags <- Lead_and_Crime %>% 
+  mutate(
+    lead_19yr_lag = lead_per_cap,
+    lead_22yr_lag = lag(lead_per_cap, 3),
+    lead_24yr_lag = lag(lead_per_cap, 5)
+    )
+```
+
+Let's graph violent crime and lead per capita (with a 22-year lag) on the y-axis, and year on the x-axis. 
+
+```{r}
+Lead_and_Crime_lags %>% ggplot() +
+  geom_point(mapping=aes(x = year,y = violent_crime_rate,
+                         color='Violent Crime Rates')) +
+  labs(title = "Violent Crime Rates",
+       x = "Year",
+       y = "Violent Crime Rate") +
+  scale_color_manual('', 
+                breaks = c('Lead (22 years earlier)', 'Violent Crime Rates'),
+                values = c('slateblue', 'firebrick'))
+
+Lead_and_Crime_lags %>% ggplot() +
+  geom_point(mapping=aes(x = year, y = lead_22yr_lag*scale_fac,
+             color='Lead (22 years earlier)')) +
+  labs(title = "Lead (22 years earlier)",
+       x = "Year",
+       y = "Lead additives per capita (22 years earlier)") +
+  scale_color_manual('', 
+                breaks = c('Lead (22 years earlier)', 'Violent Crime Rates'),
+                values = c('slateblue', 'firebrick')) 
+  
+
+### Scaling factor to place both on the same axes
+
+scale_fac <- Lead_and_Crime_lags %>% 
+  drop_na(lead_22yr_lag) %>% 
+  summarize(max(violent_crime_rate) / max(lead_22yr_lag)) %>% 
+  as.numeric()
+  
+### Both graphs overlaid:
+
+Lead_and_Crime_lags %>% ggplot() +
+  geom_point(mapping=aes(x = year,y = violent_crime_rate,
+                         color='Violent Crime Rates'))+
+  geom_point(mapping=aes(x = year, y = lead_22yr_lag*scale_fac,
+             color='Lead (22 years earlier)'))+
+  labs(title = "Lead (22 years earlier) and Violent Crime Rates",
+       x = "Year")+
+  scale_color_manual('', 
+                breaks = c('Lead (22 years earlier)', 'Violent Crime Rates'),
+                values = c('slateblue', 'firebrick')) +
+  scale_y_continuous(name = "Violent Crime rate per capita",
+  sec.axis = sec_axis(~./scale_fac, name="Gasoline Lead 22 years earlier"))
+```
+
