@@ -231,7 +231,7 @@ Lead_and_Crime_lags %>% ggplot() +
                 values = c('slateblue', 'firebrick'))
 
 Lead_and_Crime_lags %>% ggplot() +
-  geom_point(mapping=aes(x = year, y = lead_22yr_lag*scale_fac,
+  geom_point(mapping=aes(x = year, y = lead_22yr_lag,
              color='Lead (22 years earlier)')) +
   labs(title = "Lead (22 years earlier)",
        x = "Year",
@@ -239,8 +239,9 @@ Lead_and_Crime_lags %>% ggplot() +
   scale_color_manual('', 
                 breaks = c('Lead (22 years earlier)', 'Violent Crime Rates'),
                 values = c('slateblue', 'firebrick')) 
-  
+```  
 
+```{r}
 ### Scaling factor to place both on the same axes
 
 scale_fac <- Lead_and_Crime_lags %>% 
@@ -251,9 +252,9 @@ scale_fac <- Lead_and_Crime_lags %>%
 ### Both graphs overlaid:
 
 Lead_and_Crime_lags %>% ggplot() +
-  geom_point(mapping=aes(x = year,y = violent_crime_rate,
+  geom_point(aes(x = year,y = violent_crime_rate,
                          color='Violent Crime Rates'))+
-  geom_point(mapping=aes(x = year, y = lead_22yr_lag*scale_fac,
+  geom_point(aes(x = year, y = lead_22yr_lag * scale_fac,
              color='Lead (22 years earlier)'))+
   labs(title = "Lead (22 years earlier) and Violent Crime Rates",
        x = "Year")+
@@ -261,6 +262,51 @@ Lead_and_Crime_lags %>% ggplot() +
                 breaks = c('Lead (22 years earlier)', 'Violent Crime Rates'),
                 values = c('slateblue', 'firebrick')) +
   scale_y_continuous(name = "Violent Crime rate per capita",
-  sec.axis = sec_axis(~./scale_fac, name="Gasoline Lead 22 years earlier"))
+  sec.axis = sec_axis(~ . / scale_fac, name="Gasoline Lead 22 years earlier"))
 ```
 
+Can we plot linear regression lines?
+
+```{r}
+Lead_and_Crime_lags %>% ggplot(aes(x = year,y = violent_crime_rate)) +
+  geom_point(color='firebrick') +
+  geom_smooth(color='firebrick',
+              method = lm, se=FALSE)
+
+Lead_and_Crime_lags %>%  ggplot(aes(x = year, y = lead_22yr_lag*scale_fac)) +
+  geom_point(color='slateblue') +
+  geom_smooth(color='slateblue',
+      method = lm, se=FALSE)
+```
+
+Oh dear, that doesn't look good at all. There is an obvious peak around 1991-1992, let's break up our data at that point:
+
+```{r leadplot 3, fig.fullwidth = TRUE, fig.width=6,fig.height=4,warning=FALSE}
+Lead_and_Crime_lags %>% ggplot(aes(x = year,y = violent_crime_rate)) +
+  geom_point(color='firebrick') +
+  geom_smooth(, subset(Lead_and_Crime_lags, year <= 1991),
+              color='firebrick', method = lm, se = FALSE) +
+  geom_smooth(, subset(Lead_and_Crime_lags, year >= 1992),
+              color='firebrick', method = lm, se = FALSE)
+
+Lead_and_Crime_lags %>%  ggplot(aes(x = year, y = lead_22yr_lag*scale_fac)) +
+  geom_point(color='slateblue') +
+  geom_smooth(, subset(Lead_and_Crime_lags, year <= 1991), 
+              color='slateblue', method = lm, se = FALSE) +
+  geom_smooth(, subset(Lead_and_Crime_lags, year >= 1992), 
+              color='slateblue', method = lm, se=FALSE)
+```
+
+\newpage
+
+What we really want, however, is to know the relationship between lead and violent crime. Let's look at the relationship between these directly:
+
+```{r leadplot 4,  fig.width=6,fig.height=4,warning=FALSE}
+Lead_and_Crime_lags %>% ggplot(aes(x = lead_22yr_lag, y = violent_crime_rate)) +
+  geom_point(color='forestgreen') +
+  geom_smooth(color='forestgreen', method = lm, se = FALSE)
+
+Lead_and_Crime_lags %>% lm(violent_crime_rate ~ lead_22yr_lag, data=.)
+Lead_and_Crime_lags %>% summarize(
+  cor(violent_crime_rate, lead_22yr_lag, use = 'complete.obs'))
+```
