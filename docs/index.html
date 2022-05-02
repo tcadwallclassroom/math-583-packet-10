@@ -2578,82 +2578,82 @@ summary(model_full)</code></pre>
 ## Residual standard error: 0.5286 on 456 degrees of freedom
 ## Multiple R-squared:  0.06777,    Adjusted R-squared:  0.0555 
 ## F-statistic: 5.525 on 6 and 456 DF,  p-value: 0.00001534</code></pre>
-<pre class="r"><code>model_2 &lt;- lm(score ~ rank + gender + ethnicity + age + bty_avg, 
+<pre class="r"><code>model_2 &lt;- lm(score ~ rank + gender + language + age + bty_avg, 
                  data = evals)
 summary(model_2)</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = score ~ rank + gender + ethnicity + age + bty_avg, 
+## lm(formula = score ~ rank + gender + language + age + bty_avg, 
 ##     data = evals)
 ## 
 ## Residuals:
 ##      Min       1Q   Median       3Q      Max 
-## -1.79959 -0.36672  0.08821  0.40758  0.93547 
+## -1.80602 -0.36495  0.09837  0.40369  0.94605 
 ## 
 ## Coefficients:
-##                        Estimate Std. Error t value             Pr(&gt;|t|)    
-## (Intercept)            4.231693   0.206239  20.518 &lt; 0.0000000000000002 ***
-## ranktenure track      -0.210460   0.081196  -2.592             0.009848 ** 
-## ranktenured           -0.151837   0.062172  -2.442             0.014976 *  
-## gendermale             0.204070   0.052289   3.903             0.000109 ***
-## ethnicitynot minority  0.096445   0.071849   1.342             0.180157    
-## age                   -0.008315   0.003140  -2.648             0.008376 ** 
-## bty_avg                0.062478   0.016737   3.733             0.000213 ***
+##                      Estimate Std. Error t value             Pr(&gt;|t|)    
+## (Intercept)          4.274171   0.196385  21.764 &lt; 0.0000000000000002 ***
+## ranktenure track    -0.184077   0.083149  -2.214              0.02733 *  
+## ranktenured         -0.146057   0.062149  -2.350              0.01919 *  
+## gendermale           0.211098   0.052045   4.056            0.0000587 ***
+## languagenon-english -0.202271   0.105714  -1.913              0.05633 .  
+## age                 -0.007533   0.003166  -2.380              0.01774 *  
+## bty_avg              0.062859   0.016705   3.763              0.00019 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.522 on 456 degrees of freedom
-## Multiple R-squared:  0.09073,    Adjusted R-squared:  0.07876 
-## F-statistic: 7.583 on 6 and 456 DF,  p-value: 0.00000009044</code></pre>
-<pre class="r"><code>lm(score ~ gender + ethnicity + age + bty_avg, 
+## Residual standard error: 0.521 on 456 degrees of freedom
+## Multiple R-squared:  0.0944, Adjusted R-squared:  0.08249 
+## F-statistic: 7.923 on 6 and 456 DF,  p-value: 0.00000003872</code></pre>
+<pre class="r"><code>lm(score ~ gender + language + age + bty_avg, 
                  data = evals) %&gt;% 
   summary()</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = score ~ gender + ethnicity + age + bty_avg, data = evals)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -1.87204 -0.36274  0.08209  0.41166  0.92452 
-## 
-## Coefficients:
-##                        Estimate Std. Error t value             Pr(&gt;|t|)    
-## (Intercept)            3.972699   0.174405  22.779 &lt; 0.0000000000000002 ***
-## gendermale             0.193326   0.051901   3.725             0.000220 ***
-## ethnicitynot minority  0.117211   0.071454   1.640             0.101613    
-## age                   -0.006094   0.002718  -2.242             0.025450 *  
-## bty_avg                0.064251   0.016835   3.816             0.000154 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.5257 on 458 degrees of freedom
-## Multiple R-squared:  0.07377,    Adjusted R-squared:  0.06568 
-## F-statistic: 9.119 on 4 and 458 DF,  p-value: 0.0000004282</code></pre>
-<pre class="r"><code>lm(score ~ rank + ethnicity + age + bty_avg, 
-                 data = evals) %&gt;% 
-  summary()</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = score ~ rank + ethnicity + age + bty_avg, data = evals)
+## lm(formula = score ~ gender + language + age + bty_avg, data = evals)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -1.8832 -0.3498  0.1221  0.4110  0.9618 
+## -1.8648 -0.3538  0.1154  0.4105  0.9180 
 ## 
 ## Coefficients:
-##                        Estimate Std. Error t value             Pr(&gt;|t|)    
-## (Intercept)            4.230808   0.209426  20.202 &lt; 0.0000000000000002 ***
-## ranktenure track      -0.212934   0.082448  -2.583             0.010115 *  
-## ranktenured           -0.117146   0.062484  -1.875             0.061455 .  
-## ethnicitynot minority  0.117414   0.072755   1.614             0.107254    
-## age                   -0.006349   0.003147  -2.017             0.044245 *  
-## bty_avg                0.059643   0.016980   3.513             0.000488 ***
+##                      Estimate Std. Error t value             Pr(&gt;|t|)    
+## (Intercept)          4.066822   0.166480  24.428 &lt; 0.0000000000000002 ***
+## gendermale           0.200574   0.051507   3.894             0.000113 ***
+## languagenon-english -0.251754   0.102133  -2.465             0.014069 *  
+## age                 -0.005764   0.002702  -2.133             0.033432 *  
+## bty_avg              0.064691   0.016775   3.856             0.000132 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.5301 on 457 degrees of freedom
-## Multiple R-squared:  0.06035,    Adjusted R-squared:  0.05007 
-## F-statistic: 5.871 on 5 and 457 DF,  p-value: 0.00002851</code></pre>
+## Residual standard error: 0.5238 on 458 degrees of freedom
+## Multiple R-squared:  0.08052,    Adjusted R-squared:  0.07249 
+## F-statistic: 10.03 on 4 and 458 DF,  p-value: 0.000000087</code></pre>
+<pre class="r"><code>lm(score ~ rank + language + age + bty_avg, 
+                 data = evals) %&gt;% 
+  summary()</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = score ~ rank + language + age + bty_avg, data = evals)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.8855 -0.3400  0.1237  0.4153  0.9616 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value             Pr(&gt;|t|)    
+## (Intercept)          4.295166   0.199608  21.518 &lt; 0.0000000000000002 ***
+## ranktenure track    -0.191798   0.084521  -2.269             0.023719 *  
+## ranktenured         -0.110554   0.062561  -1.767             0.077875 .  
+## languagenon-english -0.194611   0.107469  -1.811             0.070821 .  
+## age                 -0.005541   0.003180  -1.743             0.082075 .  
+## bty_avg              0.059865   0.016968   3.528             0.000461 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.5297 on 457 degrees of freedom
+## Multiple R-squared:  0.06173,    Adjusted R-squared:  0.05147 
+## F-statistic: 6.014 on 5 and 457 DF,  p-value: 0.00002104</code></pre>
 <pre class="r"><code>lm(score ~ rank + gender + age + bty_avg, 
                  data = evals) %&gt;% 
   summary()</code></pre>
@@ -2679,56 +2679,56 @@ summary(model_2)</code></pre>
 ## Residual standard error: 0.5225 on 457 degrees of freedom
 ## Multiple R-squared:  0.08713,    Adjusted R-squared:  0.07715 
 ## F-statistic: 8.724 on 5 and 457 DF,  p-value: 0.00000006471</code></pre>
-<pre class="r"><code>lm(score ~ rank + gender + ethnicity + bty_avg, 
+<pre class="r"><code>lm(score ~ rank + gender + language + bty_avg, 
                  data = evals) %&gt;% 
   summary()</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = score ~ rank + gender + ethnicity + bty_avg, data = evals)
+## lm(formula = score ~ rank + gender + language + bty_avg, data = evals)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -1.8329 -0.3694  0.0972  0.4018  0.9670 
+## -1.8406 -0.3514  0.1071  0.3981  0.9740 
 ## 
 ## Coefficients:
-##                       Estimate Std. Error t value             Pr(&gt;|t|)    
-## (Intercept)            3.77599    0.11441  33.004 &lt; 0.0000000000000002 ***
-## ranktenure track      -0.11979    0.07411  -1.616              0.10669    
-## ranktenured           -0.15887    0.06252  -2.541              0.01138 *  
-## gendermale             0.18186    0.05195   3.501              0.00051 ***
-## ethnicitynot minority  0.10029    0.07231   1.387              0.16612    
-## bty_avg                0.07284    0.01638   4.447            0.0000109 ***
+##                     Estimate Std. Error t value             Pr(&gt;|t|)    
+## (Intercept)          3.86444    0.09494  40.703 &lt; 0.0000000000000002 ***
+## ranktenure track    -0.09664    0.07497  -1.289              0.19803    
+## ranktenured         -0.15108    0.06243  -2.420              0.01591 *  
+## gendermale           0.19188    0.05168   3.713              0.00023 ***
+## languagenon-english -0.23827    0.10516  -2.266              0.02393 *  
+## bty_avg              0.07215    0.01633   4.419            0.0000124 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.5254 on 457 degrees of freedom
-## Multiple R-squared:  0.07674,    Adjusted R-squared:  0.06664 
-## F-statistic: 7.597 on 5 and 457 DF,  p-value: 0.0000007172</code></pre>
-<pre class="r"><code>lm(score ~ rank + gender + ethnicity + age, 
+## Residual standard error: 0.5236 on 457 degrees of freedom
+## Multiple R-squared:  0.08316,    Adjusted R-squared:  0.07313 
+## F-statistic:  8.29 on 5 and 457 DF,  p-value: 0.0000001634</code></pre>
+<pre class="r"><code>lm(score ~ rank + gender + language + age, 
                  data = evals) %&gt;% 
   summary()</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = score ~ rank + gender + ethnicity + age, data = evals)
+## lm(formula = score ~ rank + gender + language + age, data = evals)
 ## 
 ## Residuals:
 ##      Min       1Q   Median       3Q      Max 
-## -1.77976 -0.35415  0.07526  0.42594  1.00630 
+## -1.78545 -0.36065  0.09318  0.41392  0.93322 
 ## 
 ## Coefficients:
-##                        Estimate Std. Error t value             Pr(&gt;|t|)    
-## (Intercept)            4.653757   0.174909  26.607 &lt; 0.0000000000000002 ***
-## ranktenure track      -0.215714   0.082325  -2.620             0.009078 ** 
-## ranktenured           -0.163030   0.062972  -2.589             0.009935 ** 
-## gendermale             0.195598   0.052974   3.692             0.000249 ***
-## ethnicitynot minority  0.095017   0.072857   1.304             0.192839    
-## age                   -0.011056   0.003096  -3.571             0.000393 ***
+##                      Estimate Std. Error t value             Pr(&gt;|t|)    
+## (Intercept)          4.698824   0.163019  28.824 &lt; 0.0000000000000002 ***
+## ranktenure track    -0.190424   0.084320  -2.258             0.024395 *  
+## ranktenured         -0.157515   0.062962  -2.502             0.012707 *  
+## gendermale           0.202444   0.052738   3.839             0.000141 ***
+## languagenon-english -0.196042   0.107212  -1.829             0.068119 .  
+## age                 -0.010316   0.003122  -3.304             0.001027 ** 
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.5293 on 457 degrees of freedom
-## Multiple R-squared:  0.06294,    Adjusted R-squared:  0.05269 
-## F-statistic: 6.139 on 5 and 457 DF,  p-value: 0.00001611</code></pre>
+## Residual standard error: 0.5284 on 457 degrees of freedom
+## Multiple R-squared:  0.06628,    Adjusted R-squared:  0.05607 
+## F-statistic: 6.488 on 5 and 457 DF,  p-value: 0.000007653</code></pre>
 <pre class="r"><code>model_3 &lt;- lm(score ~ rank + gender + age + bty_avg, 
                  data = evals)  
 summary(model_3)</code></pre>
