@@ -51,7 +51,8 @@ elmhurst %>% ggplot(aes(x = family_income, y = gift_aid)) +
 It looks like there is at least some general tend toward higher family income corresponding to lower gift aid offered. We can calculate the *least squares regression line* using the `lm` command, and the correlation with `cor`. The correlation is often called \(R\), and \(R^2\)
 
 ```{r elmhurst calculation}
-elm_model <- elmhurst %>% lm(gift_aid ~ family_income, data = .)
+elm_model <- elmhurst %>% 
+  lm(gift_aid ~ family_income, data = .)
 summary(elm_model)
 R <- elmhurst %>% summarize(cor(gift_aid,family_income))
 R
@@ -284,16 +285,16 @@ Oh dear, that doesn't look good at all. There is an obvious peak around 1991-199
 ```{r leadplot 3, fig.fullwidth = TRUE, fig.width=6,fig.height=4,warning=FALSE}
 Lead_and_Crime_lags %>% ggplot(aes(x = year,y = violent_crime_rate)) +
   geom_point(color='firebrick') +
-  geom_smooth(, subset(Lead_and_Crime_lags, year <= 1991),
+  geom_smooth(data = subset(Lead_and_Crime_lags, year <= 1991),
               color='firebrick', method = lm, se = FALSE) +
-  geom_smooth(, subset(Lead_and_Crime_lags, year >= 1992),
+  geom_smooth(data = subset(Lead_and_Crime_lags, year >= 1992),
               color='firebrick', method = lm, se = FALSE)
 
 Lead_and_Crime_lags %>%  ggplot(aes(x = year, y = lead_22yr_lag*scale_fac)) +
   geom_point(color='slateblue') +
-  geom_smooth(, subset(Lead_and_Crime_lags, year <= 1991), 
+  geom_smooth(data = subset(Lead_and_Crime_lags, year <= 1991), 
               color='slateblue', method = lm, se = FALSE) +
-  geom_smooth(, subset(Lead_and_Crime_lags, year >= 1992), 
+  geom_smooth(data = subset(Lead_and_Crime_lags, year >= 1992), 
               color='slateblue', method = lm, se=FALSE)
 ```
 
@@ -310,3 +311,112 @@ Lead_and_Crime_lags %>% lm(violent_crime_rate ~ lead_22yr_lag, data=.)
 Lead_and_Crime_lags %>% summarize(
   cor(violent_crime_rate, lead_22yr_lag, use = 'complete.obs'))
 ```
+
+
+# Linear and Multiple Regression
+
+This section is based on an activity found at (https://openintrostat.github.io/oilabs-tidy/09_multiple_regression/multiple_regression.html)
+
+For the last section, let's look at a set of data collected from University of Texas at Austin, containing average evaluation scores for 463 courses. In addition, six students rated the physical appearance of each professor. The premise of the study is that better looking teachers are rated more favorably. Let's look at the data:
+
+```{r}
+evals %>% ggplot(aes(x = bty_avg, y = score)) +
+  geom_point()
+```
+
+You may notice that we seem to have fewer points than we should in our scatterplot. Try `geom_jitter` instead of `geom_point`:
+
+```{r}
+evals %>% ggplot(aes(x = bty_avg, y = score)) +
+  geom_jitter()
+```
+
+As before, we can plot a regression line:
+
+```{r}
+ggplot(data = evals, aes(x = bty_avg, y = score)) +
+  geom_jitter() +
+  geom_smooth(method = "lm", se = FALSE)
+
+
+model_bty <- evals %>% 
+  lm(score ~ bty_avg, data = .)
+summary(model_bty)
+```
+
+Now, we can add more variables into the model. We want to try to add variables that are *independent*, when possible. For example, it wouldn't make sense to add any of the individual `bty` variables, since they are highly correlated. For example:
+
+```{r}
+evals %>% 
+  summarise(cor(bty_avg, bty_f1lower))
+```
+
+Let's see what happens when we add a categorical variable, `gender`, to the model:
+
+```{r}
+model_bty_gen <- lm(score ~ bty_avg + gender, data = evals)
+summary(model_bty_gen)
+```
+
+We can also start with lots of variables, and drop variables that don't seem to offer much predictive power:
+
+```{r}
+model_full <- lm(score ~ rank + gender + ethnicity + language + age + bty_avg, 
+                 data = evals)
+summary(model_full)
+
+lm(score ~ gender + ethnicity + language + age + bty_avg, 
+                 data = evals) %>% 
+  summary()
+
+lm(score ~ rank + ethnicity + language + age + bty_avg, 
+                 data = evals) %>% 
+  summary()
+
+lm(score ~ rank + gender + language + age + bty_avg, 
+                 data = evals) %>% 
+  summary()
+
+lm(score ~ rank + gender + ethnicity + age + bty_avg, 
+                 data = evals) %>% 
+  summary()
+
+lm(score ~ rank + gender + ethnicity + language + bty_avg, 
+                 data = evals) %>% 
+  summary()
+
+lm(score ~ rank + gender + ethnicity + language + age, 
+                 data = evals) %>% 
+  summary()
+
+
+model_2 <- lm(score ~ rank + gender + ethnicity + age + bty_avg, 
+                 data = evals)
+summary(model_2)
+
+lm(score ~ gender + ethnicity + age + bty_avg, 
+                 data = evals) %>% 
+  summary()
+
+lm(score ~ rank + ethnicity + age + bty_avg, 
+                 data = evals) %>% 
+  summary()
+
+lm(score ~ rank + gender + age + bty_avg, 
+                 data = evals) %>% 
+  summary()
+
+lm(score ~ rank + gender + ethnicity + bty_avg, 
+                 data = evals) %>% 
+  summary()
+
+lm(score ~ rank + gender + ethnicity + age, 
+                 data = evals) %>% 
+  summary()
+
+model_3 <- lm(score ~ rank + gender + age + bty_avg, 
+                 data = evals)  
+summary(model_3)
+```
+
+What does this model tell us?
