@@ -390,15 +390,15 @@ lm(score ~ rank + gender + ethnicity + language + age,
   summary()
 
 
-model_2 <- lm(score ~ rank + gender + ethnicity + age + bty_avg, 
+model_2 <- lm(score ~ rank + gender + language + age + bty_avg, 
                  data = evals)
 summary(model_2)
 
-lm(score ~ gender + ethnicity + age + bty_avg, 
+lm(score ~ gender + language + age + bty_avg, 
                  data = evals) %>% 
   summary()
 
-lm(score ~ rank + ethnicity + age + bty_avg, 
+lm(score ~ rank + language + age + bty_avg, 
                  data = evals) %>% 
   summary()
 
@@ -406,11 +406,11 @@ lm(score ~ rank + gender + age + bty_avg,
                  data = evals) %>% 
   summary()
 
-lm(score ~ rank + gender + ethnicity + bty_avg, 
+lm(score ~ rank + gender + language + bty_avg, 
                  data = evals) %>% 
   summary()
 
-lm(score ~ rank + gender + ethnicity + age, 
+lm(score ~ rank + gender + language + age, 
                  data = evals) %>% 
   summary()
 
