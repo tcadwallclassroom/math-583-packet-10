@@ -70,11 +70,11 @@ elmhurst %>%  ggplot(aes(x = family_income, y = gift_aid)) +
   geom_smooth(color='firebrick', method=lm, se=FALSE)
 ```
 
-Before continuing, draw 2 more more scatter plots: First, plot `family_income` on the x-axis and `price_paid` on the y-axis, then `gift_aid` on the x-axis and `price_paid` on the y-axis. For each of these, plat the linear regression line, and find the $r$ and $r^2$ values. What do you notice/wonder?
+Before continuing, draw 2 more more scatter plots: First, plot `family_income` on the x-axis and `price_paid` on the y-axis, then `gift_aid` on the x-axis and `price_paid` on the y-axis. For each of these, plot the linear regression line, and find the $R$ and $R^2$ values. What do you notice/wonder?
 
 ## Confidence Intervals and Hypothesis Tests for slope and correlation
 
-Our old friend, the `infer` package, can use the bootstrap to calculate a confidence interval for the correlation coefficient, R, or the slope of the linear regression model.
+Our old friend, the `infer` package, can use the bootstrap to calculate a confidence interval for the correlation coefficient, $R$, or the slope of the linear regression model.
 
 ```{r}
 
@@ -115,7 +115,7 @@ R_hat_boot_dist %>% visualize(bins = 30) +
   shade_confidence_interval(endpoints = R_percentile_ci)
 ```
 
-He can also run a hypothesis test with null hypothesis that the slope (or R) is equal to 0. As before, we will run a permutation test:
+We can also run a hypothesis test with null hypothesis that the slope (or R) is equal to 0. As before, we will run a permutation test:
 
 ```{r}
 slope_hat <-  elmhurst %>% 
@@ -163,16 +163,56 @@ EPI_Wages_R %>% ggplot() +
                      values = c("firebrick", "slateblue")) +
   labs(title = "Median Hourly Wages for Men and Women",
        x = "Year",
-       y = "Median Hourly Wage in 2019 dollars") 
+       y = "Median Hourly Wage in 2019 dollars",
+       color = "Sex") 
 ```
+
+This code is pretty clunky. We can use the `pivot_longer` function from `tidyr` (one of the `tidyverse` packages):
+
+```{r}
+EPI_Wages_tidy <- EPI_Wages_R %>%
+  pivot_longer(c(`Men Median`,`Women Median`), 
+               names_to = c("sex","measure"), 
+               names_sep = " ",
+               values_to = "value") %>% 
+  select(c(Date, sex, measure, value))
+
+EPI_Wages_tidy %>% 
+  ggplot(aes(
+    x = Date,
+    y = value,
+    groups = sex,
+    col = sex
+  )) +
+  geom_point() +
+  geom_smooth(method = lm, se = F) +
+  scale_color_manual(breaks = c("Men", "Women"),
+                     values = c("firebrick", "slateblue")) +
+  labs(title = "Median Hourly Wages for Men and Women",
+       x = "Year",
+       y = "Median Hourly Wage (2019 $s)",
+       color = "Sex") 
+```
+
 
 Let's find the linear regression models and correlation coefficients:
 
 ```{r firstlm+cor}
-EPI_Wages_R %>% lm(`Men Median` ~ Date, data = .)
-EPI_Wages_R %>% summarize(cor(`Men Median`, Date))
-EPI_Wages_R %>% lm(`Women Median` ~ Date, data = .)
-EPI_Wages_R %>% summarize(cor(`Women Median`, Date))
+EPI_Wages_tidy %>% 
+  filter(sex == "Men") %>% 
+  lm(value ~ Date, data = .)
+
+EPI_Wages_tidy %>% 
+  filter(sex == "Men") %>% 
+  summarize(cor(value, Date))
+
+EPI_Wages_tidy %>% 
+  filter(sex == "Women") %>% 
+  lm(value ~ Date, data = .)
+
+EPI_Wages_tidy %>% 
+  filter(sex == "Women") %>% 
+  summarize(cor(value, Date))
 ```
 
 Before continuing, ask yourself: is it true that men's median wages are declining? Run a hypothesis test to find out! 
@@ -307,7 +347,10 @@ Lead_and_Crime_lags %>% ggplot(aes(x = lead_22yr_lag, y = violent_crime_rate)) +
   geom_point(color='forestgreen') +
   geom_smooth(color='forestgreen', method = lm, se = FALSE)
 
-Lead_and_Crime_lags %>% lm(violent_crime_rate ~ lead_22yr_lag, data=.)
+Lead_and_Crime_lags %>% 
+  lm(violent_crime_rate ~ lead_22yr_lag, data=.) %>% 
+  summary()
+
 Lead_and_Crime_lags %>% summarize(
   cor(violent_crime_rate, lead_22yr_lag, use = 'complete.obs'))
 ```
